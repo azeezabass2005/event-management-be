@@ -1,0 +1,129 @@
+/**
+ * Controller handling event related operations that requires authorization
+ * @class EventController
+ * @extends BaseController
+ */
+import BaseController from "../base-controller";
+import EventService from "../../../services/event.service";
+import {Request, Response, NextFunction} from "express";
+import errorResponseMessage from "../../../common/messages/error-response-message";
+import {eventCreateValidate, eventPublicationStatusValidate, eventUpdateValidate} from "../../../validators";
+
+class EventController extends BaseController {
+    private eventService: EventService;
+
+    constructor () {
+        super();
+        this.eventService = new EventService();
+        this.setupRoutes();
+    }
+
+    /**
+     * Setup routes for event operations
+     * @protected
+     */
+    protected setupRoutes(): void {
+        // Get all events by the user
+        this.router.get("/", this.getAllEventByUser.bind(this));
+
+        // Create a new event
+        this.router.post("/", eventCreateValidate, this.createEvent.bind(this));
+
+        // Update an existing event
+        this.router.patch("/:id", eventUpdateValidate, this.updateEvent.bind(this));
+
+        // Update an event publication status
+        this.router.patch("/publication-status/:id", eventPublicationStatusValidate, this.updateEventPublicationStatus.bind(this))
+
+    }
+
+    /**
+     * Gets all the event created by current user
+     * @private
+     */
+    private async getAllEventByUser(req: Request, res: Response, next: NextFunction) {
+        try {
+
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            const user = res.locals.user;
+
+            const events = this.eventService.paginate({ user: user._id! }, {
+                page,
+                limit,
+                sort: {created_at: -1},
+                populate: ['user']
+            });
+            return this.sendSuccess(res, {
+                events,
+                message: "All events created by user retrieved successfully"
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    /**
+     * Creates a new event
+     * @private
+     */
+    private async createEvent(req: Request, res: Response, next: NextFunction) {
+        try {
+            const event = await this.eventService.create(req.body);
+            return this.sendSuccess(res, {
+                event,
+                message: "Event created successfully",
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    /**
+     * Updates an existing event
+     * @private
+     */
+    private async updateEvent(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = res.locals.user;
+            if(req.body.publicationSTatus) {
+                return next(errorResponseMessage.payloadIncorrect("Publication status cannot be updated through this endpoint"))
+            }
+            if(!user) {
+                return next(errorResponseMessage.unauthorized("Invalid user"));
+            }
+            const event = await this.eventService.updateEventById(user._id!, req.params.id!, req.body);
+            return this.sendSuccess(res, {
+                event,
+                message: "Event updated successfully",
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    /**
+     * Publishes an event and there is no going back after publishing an event
+     * @private
+     */
+    private async updateEventPublicationStatus(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = res.locals.user;
+            if(!user) {
+                return next(errorResponseMessage.unauthorized("Invalid user"));
+            }
+            const event = await this.eventService.updateEventStatus(user._id!, req.params.id!, req.body.eventPublicationStatus!);
+            return this.sendSuccess(res, {
+                event,
+                message: "Event publication status updated successfully",
+            })
+        } catch(error) {
+            return next(error)
+        }
+    }
+
+
+}
+
+export default new EventController().router;
