@@ -24,12 +24,12 @@ const ZCreateEvent = z.object({
         .optional(),
 
     capacity: z
-        .number()
+        .coerce.number()
         .int("The capacity can only be an integer")
         .min(10, "The event must be able to hold at least 10 people")
         .optional(),
     price: z
-        .number()
+        .coerce.number()
         .optional(),
     time: z
         .iso
@@ -42,9 +42,6 @@ const ZCreateEvent = z.object({
         .enum(Object.values(EVENT_CATEGORY), {
             error: "Invalid event category"
         }),
-    image: z
-        .instanceof(File)
-        .optional(),
     description: z
         .string()
         .min(10, "The event description is too short")

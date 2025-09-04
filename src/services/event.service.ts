@@ -9,6 +9,8 @@ import Event from "../models/event.model"
 import DBService from "../utils/db.utils";
 import {IEvent, PublicationStatus} from "../models/interface";
 import errorResponseMessage from "../common/messages/error-response-message";
+import {FileUploadFactory} from "./file-upload.factory";
+import {UploadResult} from "../types/file.types";
 
 class EventService extends DBService<IEvent> {
     /**
@@ -22,6 +24,8 @@ class EventService extends DBService<IEvent> {
         super(Event, populatedField);
     }
 
+    private profileUploadService = FileUploadFactory.getProfileUploadService();
+
     /**
      * Verify if the user is the owner of the event
      */
@@ -34,14 +38,48 @@ class EventService extends DBService<IEvent> {
     }
 
     /**
+     * Creates event with the image
+     */
+    public async createEventWithImage(eventData: Partial<IEvent>, image: Express.Multer.File | undefined) {
+        let uploadResult: UploadResult | null = null;
+
+        if(image) {
+            uploadResult = await this.profileUploadService.uploadFile(image, {
+                folder: 'profiles/',
+                customFilename: `partner_${Date.now()}`,
+                makePublic: true,
+            })
+            if(!uploadResult.success) {
+                throw errorResponseMessage.unableToComplete("Profile image upload failed");
+            }
+        }
+
+        return await this.create({...eventData, ...( uploadResult ? {image: uploadResult.file!.url} : {})})
+    }
+
+    /**
      * Updates event for a user if they are the owner
      */
-    public async updateEventById(userId: string, eventId: string, eventData: Partial<IEvent>) {
+    public async updateEventById(userId: string, eventId: string, eventData: Partial<IEvent>, image: Express.Multer.File | undefined) {
         const isOwner = await this.verifyOwnership(userId, eventId);
         if (!isOwner) {
             throw errorResponseMessage.unauthorized("You are unauthorized to update this event")
         }
-        return await this.updateById(eventId, eventData);
+
+        let uploadResult: UploadResult | null = null;
+
+        if(image) {
+            uploadResult = await this.profileUploadService.uploadFile(image, {
+                folder: 'profiles/',
+                customFilename: `partner_${Date.now()}`,
+                makePublic: true,
+            })
+            if(!uploadResult.success) {
+                throw errorResponseMessage.unableToComplete("Profile image upload failed");
+            }
+        }
+
+        return await this.updateById(eventId,{...eventData, ...( uploadResult ? {image: uploadResult.file!.url} : {})})
     }
 
     /**
@@ -52,6 +90,7 @@ class EventService extends DBService<IEvent> {
         if (!isOwner) {
             throw errorResponseMessage.unauthorized("You unauthorized to change the publication status of this event")
         }
+
         return await this.updateById(eventId, { status });
     }
 }

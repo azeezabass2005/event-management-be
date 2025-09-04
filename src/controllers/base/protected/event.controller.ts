@@ -8,6 +8,7 @@ import EventService from "../../../services/event.service";
 import {Request, Response, NextFunction} from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
 import {eventCreateValidate, eventPublicationStatusValidate, eventUpdateValidate} from "../../../validators";
+import {MulterMiddleware} from "../../../middlewares/multer.middleware";
 
 class EventController extends BaseController {
     private eventService: EventService;
@@ -27,10 +28,10 @@ class EventController extends BaseController {
         this.router.get("/", this.getAllEventByUser.bind(this));
 
         // Create a new event
-        this.router.post("/", eventCreateValidate, this.createEvent.bind(this));
+        this.router.post("/", MulterMiddleware.single('profileImage'), MulterMiddleware.handleError, eventCreateValidate, this.createEvent.bind(this));
 
         // Update an existing event
-        this.router.patch("/:id", eventUpdateValidate, this.updateEvent.bind(this));
+        this.router.patch("/:id", MulterMiddleware.single('profileImage'), MulterMiddleware.handleError, eventUpdateValidate, this.updateEvent.bind(this));
 
         // Update an event publication status
         this.router.patch("/publication-status/:id", eventPublicationStatusValidate, this.updateEventPublicationStatus.bind(this))
@@ -70,7 +71,7 @@ class EventController extends BaseController {
      */
     private async createEvent(req: Request, res: Response, next: NextFunction) {
         try {
-            const event = await this.eventService.create(req.body);
+            const event = await this.eventService.createEventWithImage(req.body, req.file);
             return this.sendSuccess(res, {
                 event,
                 message: "Event created successfully",
@@ -93,7 +94,7 @@ class EventController extends BaseController {
             if(!user) {
                 return next(errorResponseMessage.unauthorized("Invalid user"));
             }
-            const event = await this.eventService.updateEventById(user._id!, req.params.id!, req.body);
+            const event = await this.eventService.updateEventById(user._id!, req.params.id!, req.body, req.file);
             return this.sendSuccess(res, {
                 event,
                 message: "Event updated successfully",
