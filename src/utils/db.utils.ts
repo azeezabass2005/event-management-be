@@ -9,7 +9,7 @@ import {
  * Represents the result of a pagination operation
  * @template T The type of the model
  */
-interface PaginationResult<T> {
+export interface PaginationResult<T> {
     itemsCount: number;
     data: HydratedDocument<T>[];
     perPage: number;

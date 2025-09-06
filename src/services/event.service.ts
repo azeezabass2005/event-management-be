@@ -6,7 +6,7 @@ import Event from "../models/event.model"
  * @description Extends the generic DBService with Event-specific operations
  * @extends {DBService<IEvent>}
  */
-import DBService from "../utils/db.utils";
+import DBService, {PaginationResult} from "../utils/db.utils";
 import {IEvent, PublicationStatus} from "../models/interface";
 import errorResponseMessage from "../common/messages/error-response-message";
 import {FileUploadFactory} from "./file-upload.factory";
@@ -93,6 +93,65 @@ class EventService extends DBService<IEvent> {
 
         return await this.updateById(eventId, { status });
     }
+
+
+    /**
+     * Search partners with flexible text matching
+     * @param searchTerm - The term to search for
+     * @param filters - Additional filters
+     * @param options - Pagination and sorting options
+     */
+    public async searchEvents(
+        searchTerm: string,
+        filters: Partial<IEvent> = {},
+        options: {
+            page?: number;
+            limit?: number;
+            populate?: string[];
+            useTextSearch?: boolean;
+        } = {}
+    ): Promise<PaginationResult<IEvent>> {
+        const { page = 1, limit = 10, populate = [], useTextSearch = false } = options;
+
+        let query: any = { ...filters };
+        let sortOptions: Record<string, any> = { created_at: -1 };
+
+        if (searchTerm?.trim()) {
+            const cleanedSearchTerm = searchTerm.trim();
+
+            if (useTextSearch && cleanedSearchTerm.length >= 3) {
+                // Use text search for better performance on full words
+                query.$text = { $search: cleanedSearchTerm };
+                sortOptions = { score: { $meta: "textScore" } };
+            } else {
+                // Use regex for partial matching
+                const escapedSearchTerm = cleanedSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(escapedSearchTerm, 'i');
+
+                query.$or = [
+                    { name: regex },
+                    { description: regex },
+                    { city: regex },
+                    { country: regex },
+                    { 'roleData.skills': { $elemMatch: { $regex: regex } } },
+                    { 'roleData.specialties': { $elemMatch: { $regex: regex } } },
+                    { 'roleData.subjects': { $elemMatch: { $regex: regex } } },
+                    { 'roleData.talents': { $elemMatch: { $regex: regex } } },
+                    { 'roleData.expertise': regex },
+                    { 'roleData.bio': regex },
+                    { 'roleData.title': regex },
+                ];
+            }
+        }
+
+        return this.paginate(query, {
+            page,
+            limit,
+            populate,
+            sort: sortOptions
+        });
+    }
+
 }
 
 export default EventService;

@@ -45,21 +45,35 @@ class EventController extends BaseController {
     private async getAllEventByUser(req: Request, res: Response, next: NextFunction) {
         try {
 
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 10;
+            const { page, limit, searchTerm, ...otherQueries } = req.query;
 
             const user = res.locals.user;
 
-            const events = this.eventService.paginate({ user: user._id! }, {
-                page,
-                limit,
-                sort: {created_at: -1},
-                populate: ['user']
-            });
-            return this.sendSuccess(res, {
-                events,
-                message: "All events created by user retrieved successfully"
-            })
+            otherQueries.user = user?._id;
+
+            let events;
+
+            if (searchTerm) {
+                events = await this.eventService.searchEvents(
+                    searchTerm.toString(),
+                    otherQueries,
+                    {
+                        page: parseInt(page as string) || 1,
+                        limit: parseInt(limit as string) || 10,
+                        populate: ['user'],
+                        useTextSearch: false
+                    }
+                );
+            } else {
+                events = await this.eventService.paginate(otherQueries, {
+                    page: parseInt(page as string) || 1,
+                    limit: parseInt(limit as string) || 10,
+                    populate: ['user'],
+                    sort: { created_at: -1 }
+                });
+            }
+
+            return this.sendSuccess(res, events)
         } catch (error) {
             return next(error)
         }
