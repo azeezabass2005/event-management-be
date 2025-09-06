@@ -10,6 +10,7 @@ import logger from './utils/logger.utils';
 import routes from './routes';
 import DatabaseService from "./config/db.config";
 import ResponseErrorHandler from "./middlewares/error.middleware";
+import cookieParser from 'cookie-parser';
 
 
 /**
@@ -44,8 +45,9 @@ class App {
         this.app.use(cors({
             origin: config.CORS_ORIGIN,
             credentials: true,
-            exposedHeaders: ['set-cookie']
+           
         }));
+        this.app.use(cookieParser())
 
         // Rate limiting
         const limiter = rateLimit({

@@ -14,7 +14,7 @@ import config from "../../../config/env.config";
 /**
  * Controller handling authentication-related operations
  * @class AuthController
- * @extends BaseController
+ * @extends BaseController 
  */
 class AuthController extends BaseController {
     private tokenBuilder: TokenBuilder;
@@ -37,7 +37,7 @@ class AuthController extends BaseController {
     protected setupRoutes(): void {
         // Registration route
         this.router.post("/register", registerValidate, this.register.bind(this));
-
+        this.router.get("/me",authMiddleware.validateAuthorization.bind(authMiddleware),this.getCurrentUser.bind(this))
         // Login route
         this.router.post("/login", loginValidate, this.login.bind(this));
 
@@ -97,10 +97,16 @@ class AuthController extends BaseController {
             // Generate verification token
             // const verificationToken = this.tokenBuilder.build().createVerifyToken({
             //     userId: user._id as string,
-            //     email: user.email,
+            //     email: user.email, 
             //     username: user.username
             // });
-
+             const token =  this.tokenBuilder.build().createToken(user)
+                res.cookie('accessToken',token,{
+                    httpOnly:true,
+                    secure:false,
+                    sameSite:'lax',
+                    maxAge:24*60*60*1000
+                })
             // TODO: Send verification email
             // await emailService.sendVerificationEmail(email, verificationToken);
 
@@ -113,9 +119,41 @@ class AuthController extends BaseController {
         }
     }
 
-    /**
+   /**
+    * 
+    check the current user and the access token in the cookies 
+    */
+   private async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const tokenString = req.cookies?.accessToken;
+    if (!tokenString) {
+      return next(errorResponseMessage.unauthorized("Missing token"));
+    }
+
+    const token = new TokenBuilder().setToken(tokenString).build();
+    const { data }: any = await token.verifyToken();
+
+    if (!data?.userId || !data?.email) {
+      return next(errorResponseMessage.unauthorized("Invalid token"));
+    }
+
+    // fetch user from DB
+    const user = await this.userService.findOne({ _id: data.userId, email: data.email });
+    if (!user) {
+      return next(errorResponseMessage.unauthorized("User not found"));
+    }
+
+    const { password, ...userData } = user.toJSON();
+    this.sendSuccess(res, { user: userData });
+  } catch (error) {
+    return next(error);
+  }
+}
+     /**
      * Authenticates a user and returns access token
      * @private
+     */
+    /**
      */
     private async login (req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
