@@ -49,7 +49,7 @@ export interface IEvent extends Document {
     date?: Date;
     time?: Date;
     category?: EventCategory;
-    image?: string | Express.Multer.File;
+    images?: string[];
     description?: string;
     faqs?: FaqItem[];
     user: Schema.Types.ObjectId;

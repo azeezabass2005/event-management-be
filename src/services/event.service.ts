@@ -41,20 +41,8 @@ class EventService extends DBService<IEvent> {
      * Creates event with the image
      */
     public async createEventWithImage(eventData: Partial<IEvent>, image: Express.Multer.File | undefined) {
-        let uploadResult: UploadResult | null = null;
 
-        if(image) {
-            uploadResult = await this.profileUploadService.uploadFile(image, {
-                folder: 'profiles/',
-                customFilename: `partner_${Date.now()}`,
-                makePublic: true,
-            })
-            if(!uploadResult.success) {
-                throw errorResponseMessage.unableToComplete("Profile image upload failed");
-            }
-        }
-
-        return await this.create({...eventData, ...( uploadResult ? {image: uploadResult.file!.url} : {})})
+        return await this.create(eventData)
     }
 
     /**
@@ -66,20 +54,7 @@ class EventService extends DBService<IEvent> {
             throw errorResponseMessage.unauthorized("You are unauthorized to update this event")
         }
 
-        let uploadResult: UploadResult | null = null;
-
-        if(image) {
-            uploadResult = await this.profileUploadService.uploadFile(image, {
-                folder: 'profiles/',
-                customFilename: `partner_${Date.now()}`,
-                makePublic: true,
-            })
-            if(!uploadResult.success) {
-                throw errorResponseMessage.unableToComplete("Profile image upload failed");
-            }
-        }
-
-        return await this.updateById(eventId,{...eventData, ...( uploadResult ? {image: uploadResult.file!.url} : {})})
+        return await this.updateById(eventId,eventData)
     }
 
     /**

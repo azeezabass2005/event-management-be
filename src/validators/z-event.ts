@@ -47,6 +47,10 @@ const ZCreateEvent = z.object({
         .min(10, "The event description is too short")
         .max(300, "The event description is too long")
         .optional(),
+    images: z
+        .array(z.string())
+        .min(1, "Please upload at least one image")
+    ,
     faqs: z
         .array(FaqQuestion)
         .optional(),

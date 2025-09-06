@@ -88,9 +88,9 @@ export const eventSchema = new Schema<IEvent>(
          * @type {string}
          * @optional
          */
-        image: {
-            type: String,
-            trim: true
+        images: {
+            type: [String],
+            default: [],
         },
 
         /**

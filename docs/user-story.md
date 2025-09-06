@@ -33,7 +33,7 @@ A campus-wide event platform for OAU that digitizes end-to-end event workflows:
 
 #### 1. Create event
 
-* As an Organizer, I want to create an event with details (title, venue, capacity, time, categories, image, description, FAQs) so attendees can discover it.
+* As an Organizer, I want to create an event with details (title, venue, capacity, time, categories, images, description, FAQs) so attendees can discover it.
 * Example: Like creating an event on Lu.ma.
 * Acceptance Criteria (AC):
     + Given I’m logged in, When I submit the form, Then the event is saved as Draft or Published and visible if Published.

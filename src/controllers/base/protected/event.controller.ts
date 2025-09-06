@@ -102,7 +102,7 @@ class EventController extends BaseController {
     private async updateEvent(req: Request, res: Response, next: NextFunction) {
         try {
             const user = res.locals.user;
-            if(req.body.publicationSTatus) {
+            if(req.body.publicationStatus) {
                 return next(errorResponseMessage.payloadIncorrect("Publication status cannot be updated through this endpoint"))
             }
             if(!user) {
