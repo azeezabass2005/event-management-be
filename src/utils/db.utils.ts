@@ -245,50 +245,67 @@ class DBService<T> {
      * @param {string[]} [options.populate] Paths to populate
      * @returns {Promise<PaginationResult<T>>} Paginated result
      */
-    public async paginate(
-        query: FilterQuery<T> = {},
-        options: {
-            page?: number;
-            limit?: number;
-            sort?: Record<string, 1 | -1>;
-            select?: string[];
-            populate?: string[];
-        } = {}
-    ): Promise<PaginationResult<T>> {
-        return this.executeWithErrorHandling(async () => {
-            const {
-                page = 1,
-                limit = 10,
-                sort = { created_at: -1 },
-                select = [],
-                populate = this.defaultPopulatedPaths
-            } = options;
+   public async paginate(
+  query: FilterQuery<T> = {},
+  options: {
+    page?: number;
+    limit?: number;
+    sort?: Record<string, 1 | -1>;
+    select?: string[];
+    populate?: string[];
+  } = {}
+): Promise<PaginationResult<T>> {
+  return this.executeWithErrorHandling(async () => {
+    const {
+      page = 1,
+      limit = 10,
+      sort = { created_at: -1 },
+      select = [],
+      populate = this.defaultPopulatedPaths,
+    } = options;
 
-            const customLabels = {
-                totalDocs: 'itemsCount',
-                docs: 'data',
-                limit: 'perPage',
-                page: 'currentPage',
-                nextPage: 'next',
-                prevPage: 'prev',
-                totalPages: 'pageCount',
-                pagingCounter: 'serialNumber',
-                meta: 'paginator'
-            };
+    const skip = (page - 1) * limit;
 
-            const paginationOptions = {
-                page,
-                limit,
-                sort,
-                customLabels,
-                populate,
-                select: select.join(' ')
-            };
+    let mongooseQuery = this.Model.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
 
-            // @ts-ignore - mongoose-paginate-v2 type issue
-            return this.Model.paginate(query, paginationOptions);
-        }, 'Pagination failed');
+    if (select.length > 0) {
+      mongooseQuery = mongooseQuery.select(select.join(" "));
     }
+
+    if (populate.length > 0) {
+      populate.forEach((p) => {
+        mongooseQuery = mongooseQuery.populate(p);
+      });
+    }
+
+    const [docs, totalDocs] = await Promise.all([
+      mongooseQuery.exec(),
+      this.Model.countDocuments(query),
+    ]);
+
+    const pageCount = Math.ceil(totalDocs / limit);
+
+    // Map into your customLabels format
+    return {
+      data: docs,
+      itemsCount: totalDocs,
+      perPage: limit,
+      currentPage: page,
+      next: page < pageCount ? page + 1 : null,
+      prev: page > 1 ? page - 1 : null,
+      pageCount,
+      serialNumber: skip + 1,
+      paginator: {
+        hasNextPage: page < pageCount,
+        hasPrevPage: page > 1,
+      },
+    };
+  }, "Pagination failed");
+}
+
 
     /**
      * Performs bulk write operations with optional transaction support
