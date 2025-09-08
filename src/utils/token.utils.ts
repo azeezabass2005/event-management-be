@@ -1,4 +1,4 @@
-import { JwtPayload, sign, verify } from 'jsonwebtoken';
+import { JwtPayload, sign, verify, SignOptions } from 'jsonwebtoken';
 import {config} from 'dotenv';
 import {
     ITokenPayload,
@@ -71,10 +71,7 @@ class Token {
      */
     createToken(
         user: IUser,
-        options: ITokenOptions = {
-            type: TokenType.ACCESS,
-            expiresIn: '168h'
-        }
+        options: ITokenOptions
     ): string {
         const { type = TokenType.ACCESS, expiresIn = '1h' } = options;
 
@@ -88,11 +85,11 @@ class Token {
         return sign(
             {
                 data: payload,
-                type: TokenType.ACCESS
+                type: type
             },
             this.getSecretKey(),
             {
-                expiresIn: '1h',
+                expiresIn: expiresIn,
                 algorithm: 'HS256'
             }
         );

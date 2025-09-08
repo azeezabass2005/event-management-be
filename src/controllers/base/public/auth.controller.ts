@@ -5,7 +5,6 @@ import TokenBuilder from "../../../utils/token.utils";
 import errorResponseMessage, {ErrorResponseCode, ErrorSeverity} from "../../../common/messages/error-response-message";
 import {IRefreshTokenPayload, TokenType} from "../../../utils/interface";
 import {ROLE_MAP} from "../../../common/constant";
-import RefreshTokenService from "../../../services/refresh.service";
 import authMiddleware from "../../../middlewares/auth.middleware";
 import {loginValidate, registerValidate} from "../../../validators";
 import {IUser} from "../../../models/interface";
@@ -18,7 +17,6 @@ import config from "../../../config/env.config";
  */
 class AuthController extends BaseController {
     private tokenBuilder: TokenBuilder;
-    private refreshTokenService: RefreshTokenService;
 
     /**
      * Creates an instance of AuthController
@@ -26,7 +24,6 @@ class AuthController extends BaseController {
     constructor() {
         super();
         this.tokenBuilder = new TokenBuilder();
-        this.refreshTokenService = new RefreshTokenService;
         this.setupRoutes();
     }
 
@@ -37,7 +34,7 @@ class AuthController extends BaseController {
     protected setupRoutes(): void {
         // Registration route
         this.router.post("/register", registerValidate, this.register.bind(this));
-        this.router.get("/me",authMiddleware.validateAuthorization.bind(authMiddleware),this.getCurrentUser.bind(this))
+
         // Login route
         this.router.post("/login", loginValidate, this.login.bind(this));
 
@@ -51,7 +48,7 @@ class AuthController extends BaseController {
         this.router.post("/reset-password", this.resetPassword.bind(this));
 
         // Refresh token route
-        this.router.post("/refresh-token", this.refreshToken.bind(this));
+        this.router.post("/refresh-token", authMiddleware.validateRefreshToken.bind(authMiddleware),  this.refreshToken.bind(this));
 
         // Logout route
         // TODO: I can migrate this protected route later, but for now just dey here.
@@ -100,18 +97,18 @@ class AuthController extends BaseController {
             //     email: user.email, 
             //     username: user.username
             // });
-             const token =  this.tokenBuilder.build().createToken(user)
-                res.cookie('accessToken',token,{
-                    httpOnly:true,
-                    secure:false,
-                    sameSite:'lax',
-                    maxAge:24*60*60*1000
-                })
+            //  const token =  this.tokenBuilder.build().createToken(user)
+            //     res.cookie('accessToken',token,{
+            //         httpOnly:true,
+            //         secure:false,
+            //         sameSite:'lax',
+            //         maxAge:24*60*60*1000
+            //     })
             // TODO: Send verification email
             // await emailService.sendVerificationEmail(email, verificationToken);
 
             this.sendSuccess(res, {
-                message: "Registration successful. Please verify your email.",
+                message: "Registration successful. You will be redirect to login.",
                 userId: user._id
             }, 201);
         } catch (error) {
@@ -119,36 +116,7 @@ class AuthController extends BaseController {
         }
     }
 
-   /**
-    * 
-    check the current user and the access token in the cookies 
-    */
-   private async getCurrentUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const tokenString = req.cookies?.accessToken;
-    if (!tokenString) {
-      return next(errorResponseMessage.unauthorized("Missing token"));
-    }
 
-    const token = new TokenBuilder().setToken(tokenString).build();
-    const { data }: any = await token.verifyToken();
-
-    if (!data?.userId || !data?.email) {
-      return next(errorResponseMessage.unauthorized("Invalid token"));
-    }
-
-    // fetch user from DB
-    const user = await this.userService.findOne({ _id: data.userId, email: data.email });
-    if (!user) {
-      return next(errorResponseMessage.unauthorized("User not found"));
-    }
-
-    const { password, ...userData } = user.toJSON();
-    this.sendSuccess(res, { user: userData });
-  } catch (error) {
-    return next(error);
-  }
-}
      /**
      * Authenticates a user and returns access token
      * @private
@@ -181,13 +149,6 @@ class AuthController extends BaseController {
                 return next(errorResponseMessage.unauthorized("Invalid credentials"));
             }
 
-            if(!user?.isCompleted) {
-                return this.sendSuccess(res, {
-                    message: "Registration not completed. Redirecting to completion step",
-                    not_completed: true,
-                    userId: user._id
-                });
-            }
 
             // TODO: I will handle this if at all we are doing email verification
             // if (!user.isVerified) {
@@ -197,7 +158,7 @@ class AuthController extends BaseController {
 
             const accessToken = this.tokenBuilder.build().createToken(user, {
                 type: TokenType.ACCESS,
-                expiresIn: '1h'
+                expiresIn: '1d'
             });
 
             const refreshToken = this.tokenBuilder.build().createToken(user, {
@@ -205,24 +166,9 @@ class AuthController extends BaseController {
                 expiresIn: '7d'
             });
 
-            console.log(accessToken, "This is the access token");
-            console.log(refreshToken, "This is the refresh token")
+            console.log(accessToken, "This is the access token from login endpoint");
+            console.log(refreshToken, "This is the refresh token from login endpoint")
 
-            const decodedRefresh = await this.tokenBuilder
-                .setToken(refreshToken)
-                .build()
-                .verifyToken();
-
-            console.log(decodedRefresh, "This is the decoded refresh token");
-
-            if(decodedRefresh) {
-                await this.refreshTokenService.saveRefreshToken(
-                    user._id as string,
-                    refreshToken,
-                    req.headers['user-agent'],
-                    req.ip
-                );
-            }
 
             res.cookie('accessToken', accessToken, {
                 httpOnly: true,
@@ -382,45 +328,20 @@ class AuthController extends BaseController {
      */
     private async refreshToken (req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { refreshToken } = req.body;
 
-            if (!refreshToken) {
-                return next(errorResponseMessage.payloadIncorrect("Refresh token is required"));
-            }
-
-            // Verify refresh token
-            const decoded = await this.tokenBuilder
-                .setToken(refreshToken)
-                .build()
-                .verifyToken();
-
-            if (decoded.type !== TokenType.REFRESH) {
-                return next(errorResponseMessage.unauthorized("Invalid refresh token"));
-            }
-
-            const refreshPayload = decoded.data as IRefreshTokenPayload;
-
-            // Verify token exists in database and is valid
-            const tokenDoc = await this.refreshTokenService.findValidToken(refreshPayload.tokenId);
-            if (!tokenDoc) {
-                return next(errorResponseMessage.unauthorized("Invalid refresh token"));
-            }
+            const user = res.locals?.user;
 
             // Find user
-            const user = await this.userService.findById(refreshPayload.userId);
             if (!user) {
                 return next(errorResponseMessage.resourceNotFound("User"));
             }
-
-            // Revoke current refresh token
-            await this.refreshTokenService.revokeToken(refreshPayload.tokenId);
 
             // Generate new tokens
             const tokenInstance = this.tokenBuilder.build();
 
             const newAccessToken = tokenInstance.createToken(user, {
                 type: TokenType.ACCESS,
-                expiresIn: '15m'
+                expiresIn: '1d'
             });
 
             const newRefreshToken = this.tokenBuilder.build().createToken(user, {
@@ -428,19 +349,15 @@ class AuthController extends BaseController {
                 expiresIn: '7d'
             });
 
+            console.log(newAccessToken, "This is the new access token from refresh endpoint")
+            console.log(newRefreshToken, "This is the new refresh token from refresh endpoint")
+
             // Save new refresh token
             const newDecodedRefresh = await this.tokenBuilder
                 .setToken(newRefreshToken)
                 .build()
                 .verifyToken();
 
-
-            await this.refreshTokenService.saveRefreshToken(
-                user._id as string,
-                (newDecodedRefresh.data as IRefreshTokenPayload).tokenId,
-                req.headers['user-agent'],
-                req.ip
-            );
 
             res.cookie('accessToken', newAccessToken, {
                 httpOnly: true,  // Secure, not accessible via JS
@@ -450,7 +367,7 @@ class AuthController extends BaseController {
                 domain: config.COOKIE_DOMAIN,
             });
 
-            res.cookie('refreshToken', refreshToken, {
+            res.cookie('refreshToken', newRefreshToken, {
                 httpOnly: true,
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
@@ -459,8 +376,7 @@ class AuthController extends BaseController {
             });
 
             this.sendSuccess(res, {
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken
+                message: "Token refreshed successfully"
             });
         } catch (error) {
             return next(error);
@@ -479,9 +395,6 @@ class AuthController extends BaseController {
             if (!user._id) {
                 return next(errorResponseMessage.unauthorized("User not authenticated"));
             }
-
-            // Revoke all refresh tokens for the user
-            await this.refreshTokenService.revokeAllUserTokens(user._id);
 
             // Clear cookies
             res.clearCookie('accessToken', {

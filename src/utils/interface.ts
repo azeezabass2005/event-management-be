@@ -1,3 +1,5 @@
+import {SignOptions} from "jsonwebtoken";
+
 /**
  * Interface for token payload data
  */
@@ -30,7 +32,7 @@ export enum TokenType {
  */
 export interface ITokenOptions {
     type?: TokenType;
-    expiresIn?: string;
+    expiresIn?: SignOptions['expiresIn'];
 }
 
 export interface IRefreshTokenPayload extends ITokenPayload {
