@@ -5,6 +5,8 @@
  */ import mongoose, {Model, model, Schema} from "mongoose";
 import {IEvent} from "./interface";
 import {EVENT_CATEGORY, EVENT_DATE_STATUS, MODEL_NAME, PUBLICATION_STATUS} from "../common/constant";
+import paginate from "mongoose-paginate-v2";
+
 
 export const eventSchema = new Schema<IEvent>(
     {
@@ -160,6 +162,8 @@ export const eventSchema = new Schema<IEvent>(
         collection: 'partners'
     }
 )
+
+eventSchema.plugin(paginate)
 
 const Event: Model<IEvent> = model<IEvent>(MODEL_NAME.EVENT, eventSchema);
 

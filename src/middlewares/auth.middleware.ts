@@ -15,19 +15,10 @@ class AuthMiddleware {
         next: NextFunction
     ) {
         try {
-            console.log(req.headers, "This is the request header");
-            console.log(req.headers.authorization, "This is the request authorization");
-            console.log(req.headers.cookie, "This is the request cookie");
-
-            const { authorization } = req.headers;
-
             // Extract token from either Authorization header or accessToken cookie
             let tokenString: string | undefined;
 
-            if (authorization) {
-                // Token from Authorization header
-                tokenString = authorization;
-            } else if (req.headers.cookie) {
+            if (req.headers.cookie) {
                 // Token from cookie
                 tokenString = this.extractTokenFromCookie(req.headers.cookie);
             }
@@ -72,6 +63,68 @@ class AuthMiddleware {
         }
     }
 
+
+    /**
+     * Validates the refresh token to generate new token sets
+     * @param req Express request object
+     * @param res Express response object
+     * @param next Next middleware function
+     */
+    async validateRefreshToken(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) {
+        try {
+            // Extract token from either Authorization header or accessToken cookie
+            let tokenString: string | undefined;
+
+            if (req.headers.cookie) {
+                // Token from cookie
+                tokenString = this.extractTokenFromCookie(req.headers.cookie, 'refreshToken');
+            }
+
+            if (!tokenString) {
+                res.status(404).json({
+                    success: false,
+                    message: "Unauthorized: Missing refresh token"
+                });
+                return;
+            }
+
+            // Validate and parse token
+            const token = this.parseToken(tokenString);
+
+            const { data, iat, exp }: any = await token.verifyToken();
+
+            // Validate token contents
+            if (!data?.email || !data?.userId) {
+                res.status(401).json({
+                    success: false,
+                    message: "Unauthorized: Invalid refresh token"
+                });
+                return;
+            }
+
+            // Attach user info to response locals
+            res.locals.userId = data.userId;
+            res.locals.email = data.email;
+
+            // Verify user exists
+            await this.verifyUser(res);
+
+            next();
+            return;
+        } catch (error) {
+            console.error("Authorization error:", error);
+            res.status(401).json({
+                success: false,
+                message: "Unauthorized: Failed to refresh token"
+            });
+            return;
+        }
+    }
+
     async logoutAll(
         req: Request,
         res: Response,
@@ -83,14 +136,15 @@ class AuthMiddleware {
     /**
      * Extracts access token from cookie string
      * @param cookieString Cookie header string
+     * @param tokenName The token to extract whether access or refresh
      * @returns Access token or undefined
      */
-    private extractTokenFromCookie(cookieString: string): string | undefined {
+    private extractTokenFromCookie(cookieString: string, tokenName: string = 'accessToken'): string | undefined {
         const cookies = cookieString.split(';').map(cookie => cookie.trim());
 
         for (const cookie of cookies) {
             const [name, value] = cookie.split('=');
-            if (name === 'accessToken') {
+            if (name === tokenName) {
                 return `Bearer ${value}`;
             }
         }
@@ -125,7 +179,6 @@ class AuthMiddleware {
             email: res.locals.email,
         });
 
-        console.log(getUser, "This is the getUser from the verifyUser");
 
         if (!getUser?._id) {
             throw new Error("User not found");
