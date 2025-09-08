@@ -41,7 +41,7 @@ const ZCreateEvent = z.object({
     category: z
         .enum(Object.values(EVENT_CATEGORY), {
             error: "Invalid event category"
-        }),
+        }).optional(),
     description: z
         .string()
         .min(10, "The event description is too short")
