@@ -34,6 +34,21 @@ interface EnvConfig {
     LOG_LEVEL: string;
     /** Log retention days */
     LOG_RETENTION_DAYS: number;
+    /** Flutterwave secret hash for webhook validation */
+    FLUTTERWAVE_SECRET_HASH: string;
+    FLUTTERWAVE_CLIENT_SECRET: string;
+    FLUTTERWAVE_CLIENT_ID: string;
+
+    /** Mail related credentials */
+    MAIL_HOST: string;
+    MAIL_PORT: string;
+    MAIL_SECURE: string;
+    MAIL_USERNAME: string;
+    MAIL_PASSWORD: string;
+    MAIL_FROM: string;
+    EMAIL_TEMPLATES_PATH: string;
+    PLATFORM_FEE_PERCENTAGE: string;
+    FRONTEND_URL: string;
 }
 
 /**
@@ -71,7 +86,20 @@ const loadEnvConfig = (): EnvConfig => {
         RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
         REDIS_URL: process.env.REDIS_URL || "",
         LOG_LEVEL: process.env.LOG_LEVEL || 'info',
-        LOG_RETENTION_DAYS: parseInt(process.env.LOG_RETENTION_DAYS || '30', 10)
+        LOG_RETENTION_DAYS: parseInt(process.env.LOG_RETENTION_DAYS || '30', 10),
+        FLUTTERWAVE_SECRET_HASH: process.env.FLUTTERWAVE_SECRET_HASH || 'lj3dfd4k5df5jld9ied3fn7df487rn2df',
+        FLUTTERWAVE_CLIENT_ID: process.env.FLUTTERWAVE_CLIENT_ID || '1234',
+        FLUTTERWAVE_CLIENT_SECRET: process.env.FLUTTERWAVE_CLIENT_SECRET || '',
+        MAIL_HOST: process.env.MAIL_HOST || '',
+        MAIL_PORT: process.env.MAIL_PORT || '',
+        MAIL_SECURE: process.env.MAIL_SECURE || '',
+        MAIL_USERNAME: process.env.MAIL_USERNAME || '',
+        MAIL_PASSWORD: process.env.MAIL_PASSWORD || '',
+        MAIL_FROM: process.env.MAIL_FROM || '',
+        EMAIL_TEMPLATES_PATH: process.env.EMAIL_TEMPLATES_PATH || '',
+        PLATFORM_FEE_PERCENTAGE: process.env.PLATFORM_FEE_PERCENTAGE || '1',
+        FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000'
+
     };
 
     // Log configuration on startup

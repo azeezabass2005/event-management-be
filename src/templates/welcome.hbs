@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to EventHub!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .welcome-banner { text-align: center; margin: 30px 0; }
+        .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 20px 0; }
+        .features { display: grid; grid-template-columns: 1fr; gap: 20px; margin: 30px 0; }
+        .feature { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #6c757d; font-size: 14px; }
+        @media (max-width: 600px) { .container { margin: 0 10px; } .content, .header { padding: 20px 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎉 Welcome to EventHub!</h1>
+        <p>Your journey to amazing events starts here</p>
+    </div>
+    <div class="content">
+        <div class="welcome-banner">
+            <h2>Hello {{name}}! 👋</h2>
+            <p>We're thrilled to have you join our community of event enthusiasts!</p>
+        </div>
+
+        <p>EventHub is your one-stop destination for discovering and booking tickets to the most exciting events in your area. From concerts and festivals to workshops and sporting events, we've got you covered.</p>
+
+        {{#if verificationLink}}
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #e7f3ff; border-radius: 8px;">
+                <h3>🔐 Verify Your Account</h3>
+                <p>Please click the button below to verify your email address and complete your registration:</p>
+                <a href="{{verificationLink}}" class="button">Verify My Account</a>
+                <p><small>This link will expire in 24 hours</small></p>
+            </div>
+        {{/if}}
+
+        <div class="features">
+            <div class="feature">
+                <h3>🎫 Easy Booking</h3>
+                <p>Book tickets in just a few clicks with our streamlined checkout process</p>
+            </div>
+            <div class="feature">
+                <h3>📱 Mobile Tickets</h3>
+                <p>Get your tickets delivered directly to your email with QR codes for easy entry</p>
+            </div>
+            <div class="feature">
+                <h3>🔔 Smart Notifications</h3>
+                <p>Never miss out! Get notified about events you love and ticket availability</p>
+            </div>
+            <div class="feature">
+                <h3>💯 Secure Payments</h3>
+                <p>Shop with confidence using our secure, encrypted payment system</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <h3>Ready to explore?</h3>
+            <p>Start browsing events and find your next great experience!</p>
+            <a href="#" class="button">Browse Events</a>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4>🎁 Welcome Bonus!</h4>
+            <p>As a welcome gift, you'll receive exclusive access to presales and member-only events. Keep an eye on your inbox for special offers!</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 EventHub. All rights reserved.</p>
+        <p>Follow us: <a href="#">Facebook</a> | <a href="#">Twitter</a> | <a href="#">Instagram</a></p>
+    </div>
+</div>
+</body>
+</html>

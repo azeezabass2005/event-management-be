@@ -41,6 +41,9 @@ export enum ErrorResponseCode {
     /** Resource already exists */
     RESOURCE_ALREADY_EXISTS = 409,
 
+    /** Resource used already */
+    RESOURCE_ALREADY_USED = 410,
+
     // System Errors (500-599)
     /** Internal server error */
     INTERNAL_SERVER_ERROR = 500
@@ -123,7 +126,7 @@ export class ErrorResponseMessage {
      * @param {z.ZodError} error - The payload that was incorrect
      * @returns {ErrorResponse} Error response with PAYLOAD_INCORRECT code
      */
-    public badRequest(error: z.ZodError): ErrorResponse {
+    public badRequest(error: z.ZodError | string): ErrorResponse {
         return this.createError(
             ErrorResponseCode.PAYLOAD_INCORRECT,
             `Payload is incorrect, check and try again!`,
@@ -141,7 +144,7 @@ export class ErrorResponseMessage {
     public resourceNotFound(resource: string): ErrorResponse {
         return this.createError(
             ErrorResponseCode.NOT_FOUND,
-            `${resource} not be found!`,
+            `${resource} not found!`,
             ErrorSeverity.MEDIUM
         );
     }
@@ -184,6 +187,20 @@ export class ErrorResponseMessage {
         return this.createError(
             ErrorResponseCode.RESOURCE_ALREADY_EXISTS,
             resource ? `${resource} Already Exists` : 'Resource Already Exists',
+            ErrorSeverity.HIGH
+        )
+    }
+
+    /**
+     * Creates an error response for resource already used
+     * @public
+     * @param {string} resource - The name of the resource that is conflicting
+     * @returns {ErrorResponse} Error response with RESOURCE_ALREADY_EXISTS code
+     */
+    public resourceUsed(resource?: string): ErrorResponse {
+        return this.createError(
+            ErrorResponseCode.RESOURCE_ALREADY_USED,
+            resource ? resource : 'Resource Already Used',
             ErrorSeverity.HIGH
         )
     }

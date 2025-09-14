@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Ticket Confirmation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .ticket-card { background: #f8f9fa; border-radius: 12px; padding: 25px; margin: 25px 0; border: 2px dashed #28a745; position: relative; }
+        .ticket-header { text-align: center; margin-bottom: 20px; }
+        .event-name { font-size: 24px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e9ecef; }
+        .detail-row:last-child { border-bottom: none; font-weight: bold; color: #28a745; }
+        .qr-section { text-align: center; margin: 25px 0; padding: 20px; background: white; border-radius: 8px; }
+        .important-note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #6c757d; font-size: 14px; }
+        @media (max-width: 600px) { .container { margin: 0 10px; } .content, .header { padding: 20px 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎟️ Ticket Confirmed!</h1>
+        <p>Your ticket has been successfully generated</p>
+    </div>
+    <div class="content">
+        <h2>Hello {{userName}},</h2>
+        <p>Great news! Your ticket for <strong>{{eventName}}</strong> has been confirmed. Here are your ticket details:</p>
+
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <div class="event-name">{{eventName}}</div>
+                <p style="color: #6c757d;">Ticket ID: {{ticketId}}</p>
+            </div>
+
+            <div class="detail-row">
+                <span>📅 Event Date:</span>
+                <span>{{formatDate eventDate}}</span>
+            </div>
+            <div class="detail-row">
+                <span>📍 Venue:</span>
+                <span>{{venue}}</span>
+            </div>
+            <div class="detail-row">
+                <span>🎫 Ticket Type:</span>
+                <span>{{ticketType}}</span>
+            </div>
+            {{#if seatNumber}}
+                <div class="detail-row">
+                    <span>💺 Seat:</span>
+                    <span>{{seatNumber}}</span>
+                </div>
+            {{/if}}
+            <div class="detail-row">
+                <span>💰 Price:</span>
+                <span>{{formatCurrency price}}</span>
+            </div>
+        </div>
+
+        <div class="qr-section">
+            <h3>Your QR Code</h3>
+            <p>Please present this QR code at the venue entrance:</p>
+            <img src="cid:qrcode" alt="Ticket QR Code" style="max-width: 200px; margin: 15px 0;">
+            <p><small>Save this email or screenshot the QR code for easy access</small></p>
+        </div>
+
+        <div class="important-note">
+            <h4>⚠️ Important Information:</h4>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>Please arrive at least 30 minutes before the event starts</li>
+                <li>This QR code is unique to your ticket - do not share it</li>
+                <li>Bring a valid ID for verification if required</li>
+                <li>Check the weather and dress appropriately for outdoor events</li>
+            </ul>
+        </div>
+
+        <p>We're excited to see you at the event! If you have any questions, please don't hesitate to contact our support team.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2025 EventHub. All rights reserved.</p>
+        <p>Questions? Contact us at <a href="mailto:support@eventhub.com">support@eventhub.com</a></p>
+    </div>
+</div>
+</body>
+</html>

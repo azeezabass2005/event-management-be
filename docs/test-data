@@ -1,0 +1,66 @@
+First Event: Next JS bla bla bla
+68c678ae819d47b20c7d6d0d
+
+Second Event:
+68c67a20819d47b20c7d6d11
+
+Third Event: This event is good to test and moreover the user that created it is the test@gmail.com
+68c67c8e8d1de8ff59326245
+
+
+Test User 1
+{
+  "firstName": "David",
+  "lastName": "Adeyemi",
+  "email": "david.adeyemi@example.com",
+  "password": "StrongPass789",
+  "phoneNumber": "09012345678",
+  "whatsappNumber": "09087654321"
+}
+
+{
+    "success": true,
+    "data": {
+        "message": "Registration successful. You will be redirect to login.",
+        "userId": "68c682468d1de8ff5932624d"
+    }
+}
+
+
+Test User 2
+{
+  "firstName": "Kemi",
+  "lastName": "Balogun",
+  "email": "kemi.balogun@example.com",
+  "password": "BalogunPass2025",
+  "phoneNumber": "07034567891",
+  "whatsappNumber": "07098765432"
+}
+
+{
+    "success": true,
+    "data": {
+        "message": "Registration successful. You will be redirect to login.",
+        "userId": "68c682868d1de8ff59326250"
+    }
+}
+
+
+Test User 3
+{
+  "firstName": "Tunde",
+  "lastName": "Okafor",
+  "email": "tunde.okafor@example.com",
+  "password": "OkaforPass321",
+  "phoneNumber": "08176543210",
+  "whatsappNumber": "08123456701"
+}
+
+{
+    "success": true,
+    "data": {
+        "message": "Registration successful. You will be redirect to login.",
+        "userId": "68c682b78d1de8ff59326253"
+    }
+}
+

@@ -88,7 +88,8 @@ class EventController extends BaseController {
      */
     private async createEvent(req: Request, res: Response, next: NextFunction) {
         try {
-            const event = await this.eventService.createEventWithImage(req.body, req.file);
+            const user = res.locals.user;
+            const event = await this.eventService.createEventWithImage({ ...req.body, user: user._id!}, req.file);
             return this.sendSuccess(res, {
                 event,
                 message: "Event created successfully",
@@ -137,6 +138,23 @@ class EventController extends BaseController {
           data: event
         });
       }
+
+    private async getSingleEvent(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params;
+            const event = await this.eventService.findById(id!);
+            if(!event) {
+                next(errorResponseMessage.resourceNotFound("Event"))
+                return;
+            }
+            return this.sendSuccess(res, {
+                message: "Event retrieved successfully",
+                event
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 
     /**
      * Publishes an event and there is no going back after publishing an event

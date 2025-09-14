@@ -88,6 +88,31 @@ export const UserSchema = new Schema<IUser>(
          * @optional
          */
         hearAboutUs: { type: String, enum: ['friends', 'ads', 'others'] },
+
+        /**
+         * Flutterwave Customer ID
+         * @type {String}
+         * @optional
+         */
+        flutterwaveCustomerId: { type: String },
+
+        /**
+         * Available balance
+         * @type {Number}
+         */
+        availableBalance: {
+            type: Number,
+            default: 0
+        },
+
+        /**
+         * Total Earnings
+         * @type {Number}
+         */
+        totalEarnings: {
+            type: Number,
+            default: 0
+        },
     },
     {
         /** Enable virtual properties when converting to plain object */
