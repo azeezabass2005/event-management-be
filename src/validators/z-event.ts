@@ -33,7 +33,7 @@ const ZCreateEvent = z.object({
         .optional(),
     time: z
         .iso
-        .time("Please enter a valid time")
+           .time("Please enter a valid time")
         .optional(),
     date: z
         .date("Please enter a valid date")

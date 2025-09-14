@@ -9,6 +9,8 @@ import {Request, Response, NextFunction} from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
 import {eventCreateValidate, eventPublicationStatusValidate, eventUpdateValidate} from "../../../validators";
 import {MulterMiddleware} from "../../../middlewares/multer.middleware";
+import { TbShirtSport } from "react-icons/tb";
+
 
 class EventController extends BaseController {
     private eventService: EventService;
@@ -26,12 +28,13 @@ class EventController extends BaseController {
     protected setupRoutes(): void {
         // Get all events by the user
         this.router.get("/", this.getAllEventByUser.bind(this));
-
+        this.router.get("/:id",this.getEventById.bind(this))
         // Create a new event
         this.router.post("/", MulterMiddleware.single('profileImage'), MulterMiddleware.handleError, eventCreateValidate, this.createEvent.bind(this));
 
         // Update an existing event
         this.router.patch("/:id", MulterMiddleware.single('profileImage'), MulterMiddleware.handleError, eventUpdateValidate, this.updateEvent.bind(this));
+
 
         // Update an event publication status
         this.router.patch("/publication-status/:id", eventPublicationStatusValidate, this.updateEventPublicationStatus.bind(this))
@@ -117,6 +120,23 @@ class EventController extends BaseController {
             return next(error)
         }
     }
+    private async getEventById(req: Request, res: Response, next: NextFunction) {
+        const { user } = res.locals;
+        if (!user) return next(errorResponseMessage.unauthorized("Invalid User"));
+      
+        const { id } = req.query; // okay if you want to use query string
+        if (!id) return next(errorResponseMessage.createError(404, "ID not given"));
+      
+        const event = await this.eventService.getEventById(id as string);
+      
+        if (!event) return next(errorResponseMessage.resourceNotFound("Event not found"));
+      
+        // ✅ Use 200 OK
+        return res.status(200).json({
+          message: "Event retrieved successfully",
+          data: event
+        });
+      }
 
     /**
      * Publishes an event and there is no going back after publishing an event

@@ -8,7 +8,7 @@ import {ROLE_MAP} from "../../../common/constant";
 import authMiddleware from "../../../middlewares/auth.middleware";
 import {loginValidate, registerValidate} from "../../../validators";
 import {IUser} from "../../../models/interface";
-import config from "../../../config/env.config";
+import config, { getCookieDomain } from "../../../config/env.config";
 
 /**
  * Controller handling authentication-related operations
@@ -170,13 +170,15 @@ class AuthController extends BaseController {
             console.log(refreshToken, "This is the refresh token from login endpoint")
 
 
+            const cookieDomain = getCookieDomain();
+
             res.cookie('accessToken', accessToken, {
                 httpOnly: true,
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 path: "/",
                 maxAge: 60 * 60 * 1000,
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
 
             res.cookie('refreshToken', refreshToken, {
@@ -185,7 +187,7 @@ class AuthController extends BaseController {
                 sameSite: 'lax',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
 
             res.cookie('role', Object.entries(ROLE_MAP).find(([_, v]) => v === user.role)?.[0], {
@@ -194,7 +196,7 @@ class AuthController extends BaseController {
                 sameSite: 'lax',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
 
             this.sendSuccess(res, {
@@ -359,12 +361,14 @@ class AuthController extends BaseController {
                 .verifyToken();
 
 
+            const cookieDomain = getCookieDomain();
+
             res.cookie('accessToken', newAccessToken, {
                 httpOnly: true,  // Secure, not accessible via JS
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 maxAge: 60 * 60 * 1000,  // 1 hour
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
 
             res.cookie('refreshToken', newRefreshToken, {
@@ -372,7 +376,7 @@ class AuthController extends BaseController {
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
             });
 
             this.sendSuccess(res, {
@@ -397,8 +401,9 @@ class AuthController extends BaseController {
             }
 
             // Clear cookies
+            const cookieDomain = getCookieDomain();
             res.clearCookie('accessToken', {
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 path: "/",
@@ -406,7 +411,7 @@ class AuthController extends BaseController {
             });
 
             res.clearCookie('refreshToken', {
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 path: "/",
@@ -414,7 +419,7 @@ class AuthController extends BaseController {
             });
 
             res.clearCookie('role', {
-                domain: config.COOKIE_DOMAIN,
+                ...(cookieDomain ? { domain: cookieDomain } : {}),
                 secure: config.NODE_ENV === 'production',
                 sameSite: 'lax',
                 path: "/",

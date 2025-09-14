@@ -24,8 +24,22 @@ class EventController extends BaseController {
     protected setupRoutes(): void {
         // Route to get all events
         this.router.get("/", this.getEvents.bind(this));
+        this.router.get('/getAllEvents',this.getAllEvents.bind(this))
     }
-
+    /**
+     * get all events without query
+     */
+     private async getAllEvents(req:Request,res:Response,next:NextFunction){
+        try{
+            const events = await this.eventService.getAllEvents()
+            return res.status(200).json({
+                message:"all Events fetched successfully",
+                response:events
+            })
+        }catch(err){
+            return next(err)
+        }
+     }
     /**
      * Gets all the events
      * @private

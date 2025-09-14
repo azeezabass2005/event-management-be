@@ -66,7 +66,7 @@ const loadEnvConfig = (): EnvConfig => {
         JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1d',
         API_VERSION: process.env.API_VERSION || 'v1',
         CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
-        COOKIE_DOMAIN: process.env.COOKIE_DOMAIN || 'http://localhost:3000',
+        COOKIE_DOMAIN: process.env.COOKIE_DOMAIN || 'undefined',
         RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),
         RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
         REDIS_URL: process.env.REDIS_URL || "",
@@ -86,4 +86,28 @@ const loadEnvConfig = (): EnvConfig => {
 
 const config = loadEnvConfig();
 
-export default config;
+/**
+ * Returns a safe cookie domain or undefined when running locally or when invalid.
+ * - undefined prevents Express from setting an invalid domain option
+ */
+export const getCookieDomain = (): string | undefined => {
+    const raw = process.env.COOKIE_DOMAIN || config.COOKIE_DOMAIN;
+
+    if (!raw || raw === 'undefined') {
+        return undefined;
+    }
+
+    const trimmed = raw.trim();
+
+    // Do not set domain for localhost or IP addresses
+    const isLocalhost = trimmed === 'localhost' || trimmed.endsWith('.localhost');
+    const isIpAddress = /^\d{1,3}(?:\.\d{1,3}){3}$/.test(trimmed);
+
+    if (isLocalhost || isIpAddress) {
+        return undefined;
+    }
+
+    return trimmed;
+};
+
+export default config; 

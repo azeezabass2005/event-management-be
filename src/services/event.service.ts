@@ -36,8 +36,22 @@ class EventService extends DBService<IEvent> {
         }
         return (event.user && event.user.toString() === userId)
     }
+    /*
+    *get all events 
+    */
+    public async getAllEvents(){
+        return await this.find({})
+    }
 
-    /**
+    /**get Event by its Id */
+    public async getEventById(id:any){
+        const event = await this.find({_id:id})
+       return event
+        // console.log(id) const _id = eventId
+    }
+    
+    /*
+        
      * Creates event with the image
      */
     public async createEventWithImage(eventData: Partial<IEvent>, image: Express.Multer.File | undefined) {
