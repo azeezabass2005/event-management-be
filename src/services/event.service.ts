@@ -1,4 +1,9 @@
 import Event from "../models/event.model"
+import DBService, {PaginationResult} from "../utils/db.utils";
+import {IEvent, PublicationStatus} from "../models/interface";
+import errorResponseMessage from "../common/messages/error-response-message";
+import {FileUploadFactory} from "./file-upload.factory";
+import {UploadResult} from "../types/file.types";
 
 /**
  * Service class for Event-related operations
@@ -6,12 +11,6 @@ import Event from "../models/event.model"
  * @description Extends the generic DBService with Event-specific operations
  * @extends {DBService<IEvent>}
  */
-import DBService, {PaginationResult} from "../utils/db.utils";
-import {IEvent, PublicationStatus} from "../models/interface";
-import errorResponseMessage from "../common/messages/error-response-message";
-import {FileUploadFactory} from "./file-upload.factory";
-import {UploadResult} from "../types/file.types";
-
 class EventService extends DBService<IEvent> {
     /**
      * Creates an instance of EventService
@@ -71,7 +70,7 @@ class EventService extends DBService<IEvent> {
 
 
     /**
-     * Search partners with flexible text matching
+     * Search events with flexible text matching
      * @param searchTerm - The term to search for
      * @param filters - Additional filters
      * @param options - Pagination and sorting options

@@ -69,10 +69,10 @@ export const eventSchema = new Schema<IEvent>(
 
         /**
          * Time of the event
-         * @type {Date}
+         * @type {String}
          */
         time: {
-            type: Date,
+            type: String,
         },
 
         /**
@@ -146,7 +146,35 @@ export const eventSchema = new Schema<IEvent>(
             type: String,
             enum: Object.values(EVENT_DATE_STATUS),
             default: 'upcoming'
-        }
+        },
+
+        /**
+         * The ticket type being ordered
+         * @type  TicketType
+         * @optional
+         */
+        defaultTicketType: {
+            type: {
+                name: { type: String, required: true },
+                description: { type: String, required: true },
+                price: { type: Number, required: true },
+            }
+        },
+
+        /**
+         * Ticket types available for the event
+         * @type TicketType[]
+         */
+        ticketTypes: {
+            type: [
+                {
+                    name: { type: String, required: true },
+                    description: { type: String, required: true },
+                    price: { type: Number, required: true },
+                }
+            ],
+            default: [],
+        },
     },
     {
         /** Enable virtual properties when converting to plain object */
@@ -159,7 +187,7 @@ export const eventSchema = new Schema<IEvent>(
         timestamps: true,
 
         /** Optimize for queries */
-        collection: 'partners'
+        collection: 'events'
     }
 )
 

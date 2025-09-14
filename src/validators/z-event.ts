@@ -8,6 +8,12 @@ const FaqQuestion = z.object({
     answer: z.string(),
 });
 
+const ZTicketType = z.object({
+    name: z.string().min(1, "Ticket type name is required"),
+    description: z.string().min(1, "Ticket type description is required"),
+    price: z.coerce.number().nonnegative("Ticket price must be a positive number"),
+});
+
 const ZCreateEvent = z.object({
     title: z
         .string()
@@ -32,10 +38,11 @@ const ZCreateEvent = z.object({
         .coerce.number()
         .optional(),
     time: z
-        .iso
-        .time("Please enter a valid time")
+        .string()
+        .regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, "Please enter a valid time")
         .optional(),
     date: z
+        .coerce
         .date("Please enter a valid date")
         .optional(),
     category: z
@@ -55,11 +62,12 @@ const ZCreateEvent = z.object({
         .array(FaqQuestion)
         .optional(),
 
-    user: z
-        .string()
-        .refine((val) => val !== undefined && val !== null, {
-            message: "User is required"
-        }),
+    // I removed this cos I will get the user who made the request from the token so it's not needed
+    // user: z
+    //     .string()
+    //     .refine((val) => val !== undefined && val !== null, {
+    //         message: "User is required"
+    //     }),
 
     publicationStatus: z
         .enum(Object.values(PUBLICATION_STATUS))
@@ -68,8 +76,11 @@ const ZCreateEvent = z.object({
         .enum(Object.values(EVENT_DATE_STATUS))
         .optional(),
     automaticallyPublishAt: z
+        .coerce
         .date("The automatically publish at must be a valid date")
     .optional(),
+    ticketTypes: z.array(ZTicketType).optional(),
+    defaultTicketType: ZTicketType.optional(),
 })
 
 const ZUpdateEvent = ZCreateEvent.partial();

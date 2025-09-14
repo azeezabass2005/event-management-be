@@ -3,6 +3,8 @@ export const MODEL_NAME = {
     EVENT: "EventModel",
     REFRESH_TOKEN: "RefreshTokenModel",
     TICKET: "TicketModel",
+    ORDER: "OrderModel",
+    TRANSACTION: "TransactionModel",
 }
 
 export const ROLE_MAP = {
@@ -43,4 +45,28 @@ export const EVENT_CATEGORY = {
     TECHNOLOGY: 'technology',
     TRAVEL: 'travel',
     WORKSHOPS: 'workshops'
+};
+
+export const ORDER_STATUS = {
+    COMPLETED: 'completed',
+    PENDING: 'pending',
+    EXPIRED: 'expired',
+    FAILED: 'failed',
+    CANCELLED: 'cancelled',
+    PAID_FAILED_TICKETING: 'paid-failed-ticketing',
+    PAID_FAILED_EMAIL: 'paid-failed-email',
+}
+
+export const TRANSACTION_STATUS = {
+    PENDING: "pending",
+    SUCCESSFUL: "successful",
+    FAILED: "failed",
+    CANCELLED: "cancelled",
+};
+
+export const PAYMENT_METHOD = {
+    CARD: "card",
+    BANK_TRANSFER: "bank_transfer",
+    USSD: "ussd",
+    MOBILE_MONEY: "mobile_money",
 };

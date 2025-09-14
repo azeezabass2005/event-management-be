@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Notification</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; line-height: 1.4; color: #333; background: #f4f4f4; font-size: 14px; }
+        .container { max-width: 700px; margin: 0 auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white; padding: 20px 30px; }
+        .alert-high { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+        .alert-medium { background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: #333; }
+        .content { padding: 30px; }
+        .data-block { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 13px; overflow-x: auto; }
+        .timestamp { color: #6c757d; font-size: 12px; }
+        .footer { background: #f8f9fa; padding: 15px 30px; text-align: center; color: #6c757d; font-size: 12px; }
+        @media (max-width: 700px) { .container { margin: 0 10px; } .content, .header { padding: 20px 15px; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header {{#eq priority 'high'}}alert-high{{/eq}}{{#eq priority 'medium'}}alert-medium{{/eq}}">
+        <h1>🚨 ADMIN NOTIFICATION</h1>
+        <p class="timestamp">{{formatDate timestamp}} | Priority: {{#if priority}}{{priority}}{{else}}normal{{/if}}</p>
+    </div>
+    <div class="content">
+        <h2>{{title}}</h2>
+
+        {{#if message}}
+            <p style="margin: 20px 0;">{{message}}</p>
+        {{/if}}
+
+        {{#if error}}
+            <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h3>❌ Error Details:</h3>
+                <div class="data-block" style="background: #fff; color: #721c24;">{{error}}</div>
+            </div>
+        {{/if}}
+
+        {{#if user}}
+            <div style="margin: 20px 0;">
+                <h3>👤 User Information:</h3>
+                <div class="data-block">
+                    {{#if user.id}}User ID: {{user.id}}<br>{{/if}}
+                    {{#if user.email}}Email: {{user.email}}<br>{{/if}}
+                    {{#if user.name}}Name: {{user.name}}<br>{{/if}}
+                    {{#if user.ip}}IP Address: {{user.ip}}<br>{{/if}}
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if order}}
+            <div style="margin: 20px 0;">
+                <h3>🛒 Order Information:</h3>
+                <div class="data-block">
+                    {{#if order.id}}Order ID: {{order.id}}<br>{{/if}}
+                    {{#if order.amount}}Amount: {{formatCurrency order.amount}}<br>{{/if}}
+                    {{#if order.event}}Event: {{order.event}}<br>{{/if}}
+                    {{#if order.status}}Status: {{order.status}}<br>{{/if}}
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if system}}
+            <div style="margin: 20px 0;">
+                <h3>⚙️ System Information:</h3>
+                <div class="data-block">
+                    {{#if system.server}}Server: {{system.server}}<br>{{/if}}
+                    {{#if system.memory}}Memory Usage: {{system.memory}}<br>{{/if}}
+                    {{#if system.cpu}}CPU Usage: {{system.cpu}}<br>{{/if}}
+                    {{#if system.uptime}}Uptime: {{system.uptime}}<br>{{/if}}
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if data}}
+            <div style="margin: 20px 0;">
+                <h3>📊 Additional Data:</h3>
+                <div class="data-block">
+                    <pre>{{json data}}</pre>
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if actionRequired}}
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h3>⚡ Action Required:</h3>
+                <p style="margin-top: 10px;">{{actionRequired}}</p>
+            </div>
+        {{/if}}
+
+        <div style="background: #e2e3e5; padding: 15px; border-radius: 6px; margin: 20px 0;">
+            <p><strong>Server:</strong> {{#if server}}{{server}}{{else}}Unknown{{/if}}</p>
+            <p><strong>Environment:</strong> {{#if environment}}{{environment}}{{else}}Production{{/if}}</p>
+            <p><strong>Generated:</strong> {{formatDate timestamp}}</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>EventHub Admin System | This is an automated notification</p>
+        <p>Do not reply to this email | Check admin dashboard for more details</p>
+    </div>
+</div>
+</body>
+</html>

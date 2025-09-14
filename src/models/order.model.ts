@@ -1,16 +1,16 @@
 import {model, Model, Schema} from "mongoose";
-import {ITicket} from "./interface";
-import {MODEL_NAME} from "../common/constant";
+import {IOrder} from "./interface";
+import {MODEL_NAME, ORDER_STATUS} from "../common/constant";
 
 /**
- * Mongoose schema for Ticket model
+ * Mongoose schema for Order model
  *
- * @description Creates a schema for ticket
+ * @description Creates a schema for order
  * @remarks
  * - Includes timestamps for creation and update tracking
  * - Enables virtual property transformations
  */
-const ticketSchema = new Schema<ITicket>(
+const orderSchema = new Schema<IOrder>(
     {
         /**
          * User ID of the ticket buyer
@@ -29,14 +29,6 @@ const ticketSchema = new Schema<ITicket>(
         event: { type: Schema.Types.ObjectId, ref: MODEL_NAME.EVENT, required: true },
 
         /**
-         * ID of the order used to purchase the ticket
-         * @type {Schema.Types.ObjectId}
-         * @required
-         * @ref OrderModel
-         */
-        order: { type: Schema.Types.ObjectId, ref: MODEL_NAME.ORDER, required: true },
-
-        /**
          * The ticket type being ordered
          * @type  TicketType
          * @optional
@@ -50,34 +42,30 @@ const ticketSchema = new Schema<ITicket>(
         },
 
         /**
-         * The price of the ticket
+         * The number of tickets being ordered
+         * @type {Number}
+         * @optional
+         * @default {1}
+         */
+        numberOfTicket: { type: Number, default: 1 },
+
+
+        /**
+         * The total price of all the tickets being ordered
          * @type {String}
          */
-        price: { type: Number },
+        totalPrice: { type: Number },
 
         /**
          * The seat number allocated to the ticket
-         * @type {String}
-         * @optional
+         * @type {OrderStatus}
+         * @default {pending}
          */
-        seatNumber: { type: String },
+        status: { type: String, enum: Object.values(ORDER_STATUS), default: 'pending'},
+
 
         /**
-         * The qrCode string
-         * @type {String}
-         * @optional
-         */
-        qrCode: { type: String },
-
-        /**
-         * isUsed
-         * @type {Boolean}
-         * @optional
-         */
-        isUsed: { type: Boolean },
-
-        /**
-         * The date the ticket was purchased
+         * The date the order was made
          * @type {Date}
          * @required
          */
@@ -96,9 +84,9 @@ const ticketSchema = new Schema<ITicket>(
         timestamps: true,
 
         /** Optimize for queries */
-        collection: 'tickets'
+        collection: 'orders'
     }
 )
 
-const Ticket: Model<ITicket> = model<ITicket>(MODEL_NAME.TICKET, ticketSchema);
-export default Ticket;
+const Order: Model<IOrder> = model<IOrder>(MODEL_NAME.ORDER, orderSchema);
+export default Order;

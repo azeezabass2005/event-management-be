@@ -67,7 +67,12 @@ class App {
         this.app.use('/api', limiter);
 
         // Body parsing
-        this.app.use(express.json({ limit: '10mb' }));
+        this.app.use(express.json({
+            limit: '10mb',
+            verify: (req: Request, res: Response, buf) => {
+                req.rawBody = buf.toString('utf-8')
+            }
+        }));
         this.app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
         // Compression
