@@ -27,6 +27,9 @@ class OrderController extends BaseController {
     protected setupRoutes(): void {
         // Route to create an order
         this.router.post("/", orderCreateValidate, this.createOrder.bind(this));
+
+        // Route to get a single order, Maxima can you use this to
+        this.router.get("/:id", this.getOrder.bind(this));
     }
 
     private async createOrder(req: Request, res: Response, next: NextFunction) {
