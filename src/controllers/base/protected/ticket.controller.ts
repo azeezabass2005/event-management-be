@@ -7,6 +7,7 @@ import BaseController from "../base-controller";
 import TicketService from "../../../services/ticket.service";
 import { Request, Response, NextFunction } from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
+import { TbHistory } from "react-icons/tb";
 // import { ticketVerificationValidate, resendTicketEmailValidate } from "../../../validators";
 
 class TicketController extends BaseController {
@@ -25,7 +26,8 @@ class TicketController extends BaseController {
     protected setupRoutes(): void {
         // Get all tickets by the current user
         this.router.get("/", this.getAllTicketsByUser.bind(this));
-
+        // create ticket
+        // this.router.post("/event",this.createTickets.bind(this))
         // Get all tickets for a specific event (for event organizers)
         this.router.get("/event/:eventId", this.getAllTicketsByEvent.bind(this));
 
@@ -36,6 +38,7 @@ class TicketController extends BaseController {
         // TODO: I need to write this zod validator ticketVerificationValidate
         // Verify a ticket (for event organizers/staff)
         this.router.post("/verify", this.verifyTicket.bind(this));
+        this.router.post("/create-ticket",this.createTickets.bind(this))
 
         // TODO: I need to write the zod validator for this too resendTicketEmailValidate
         // Resend ticket email
@@ -52,9 +55,49 @@ class TicketController extends BaseController {
     }
 
     /**
+     * create TIcket by the current user
+     */
+    private async createTickets(req: Request, res: Response, next: NextFunction){
+        try {
+            console.log(req.body.data)
+          const data = req.body
+          const { user, event, order, ticketType, price, purchaseDate, count } =data
+      
+          if (!user || !event || !order || !price || !purchaseDate || !count) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Missing required fields" });
+          }
+      
+          const tickets = await this.ticketService.createTicketAndSendMail(
+            user,
+            event,
+            order,
+            ticketType || null,
+            Number(price),
+            new Date(purchaseDate),
+            Number(count)
+          );
+      
+          return this.sendSuccess(res, {
+            message: "Tickets created successfully",
+            tickets,
+          });
+        } catch (error) {
+          console.error("Error in createTickets controller:", error);
+          return next(error) // ✅ removed the extra semicolon after brace
+        }
+      }
+      
+
+
+
+
+    /**
      * Gets all tickets by the current user
      * @private
      */
+    
     private async getAllTicketsByUser(req: Request, res: Response, next: NextFunction) {
         try {
             const { page, limit, status, eventId, searchTerm } = req.query;
@@ -117,7 +160,7 @@ class TicketController extends BaseController {
      * Gets a single ticket by ID
      * @private
      */
-    private async getTicketById(req: Request, res: Response, next: NextFunction) {
+    private async   getTicketById(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
             const user = res.locals.user;
@@ -145,7 +188,7 @@ class TicketController extends BaseController {
     private async verifyTicket(req: Request, res: Response, next: NextFunction) {
         try {
             const { ticketCode } = req.body;
-
+            
             if (!ticketCode) {
                 return next(errorResponseMessage.badRequest("Ticket code is required"));
             }

@@ -24,7 +24,7 @@ class EventController extends BaseController {
     protected setupRoutes(): void {
         // Route to get all events
         this.router.get("/", this.getEvents.bind(this));
-        this.router.get('/getAllEvents',this.getAllEvents.bind(this))
+        this.router.get("/getAll",this.getAllEvents.bind(this))
     }
     /**
      * get all events without query
@@ -32,10 +32,7 @@ class EventController extends BaseController {
      private async getAllEvents(req:Request,res:Response,next:NextFunction){
         try{
             const events = await this.eventService.getAllEvents()
-            return res.status(200).json({
-                message:"all Events fetched successfully",
-                response:events
-            })
+            return this.sendSuccess(res, events)
         }catch(err){
             return next(err)
         }
@@ -80,5 +77,5 @@ class EventController extends BaseController {
         }
     }
 }
-
-export default new EventController().router;
+const eventController =new EventController().router;
+export default eventController

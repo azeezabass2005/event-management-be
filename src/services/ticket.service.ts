@@ -91,7 +91,7 @@ class TicketService extends DBService<ITicket> {
                 // Create ticket
                 const ticket = await Ticket.create({
                     user,
-                    event,
+                    event,  
                     order,
                     ...(ticketType ? {ticketType} : {}),
                     price,

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Tickets</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }
+    .container { max-width: 700px; margin: 0 auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 30px; text-align: center; }
+    .content { padding: 40px 30px; }
+    .ticket-list { margin: 20px 0; }
+    .ticket-card { background: #f8f9fa; border-radius: 12px; padding: 20px; margin: 20px 0; border: 2px dashed #28a745; }
+    .ticket-header { text-align: center; margin-bottom: 15px; }
+    .event-name { font-size: 20px; font-weight: bold; color: #28a745; margin-bottom: 5px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e9ecef; }
+    .detail-row:last-child { border-bottom: none; font-weight: bold; color: #28a745; }
+    .important-note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+    .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #6c757d; font-size: 14px; }
+    @media (max-width: 600px) { .container { margin: 0 10px; } .content, .header { padding: 20px 15px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎟️ Your Tickets Are Ready!</h1>
+      <p>Attached are all your tickets for {{eventName}}</p>
+    </div>
+
+    <div class="content">
+      <h2>Hello {{userName}},</h2>
+      <p>Thank you for your purchase! You’ve booked <strong>{{ticketCount}}</strong> tickets for <strong>{{eventName}}</strong>.  
+      All tickets are included in the attached PDF. Here’s a summary:</p>
+
+      <div class="ticket-list">
+        {{#each tickets}}
+          <div class="ticket-card">
+            <div class="ticket-header">
+              <div class="event-name">{{eventName}}</div>
+              <p style="color:#6c757d;">Ticket ID: {{ticketId}}</p>
+            </div>
+            <div class="detail-row">
+              <span>📅 Date:</span>
+              <span>{{formatDate eventDate}}</span>
+            </div>
+            <div class="detail-row">
+              <span>📍 Venue:</span>
+              <span>{{venue}}</span>
+            </div>
+            <div class="detail-row">
+              <span>🎫 Type:</span>
+              <span>{{ticketType}}</span>
+            </div>
+            {{#if seatNumber}}
+            <div class="detail-row">
+              <span>💺 Seat:</span>
+              <span>{{seatNumber}}</span>
+            </div>
+            {{/if}}
+            <div class="detail-row">
+              <span>💰 Price:</span>
+              <span>{{formatCurrency price}}</span>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+
+      <div class="important-note">
+        <h4>⚠️ Important Information:</h4>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+          <li>Your full tickets are attached as a PDF.</li>
+          <li>Please arrive at least 30 minutes before the event starts.</li>
+          <li>Each ticket contains a unique QR code — do not share them.</li>
+          <li>Bring a valid ID for verification if required.</li>
+        </ul>
+      </div>
+
+      <p>We’re excited to see you at <strong>{{eventName}}</strong>! 🎉</p>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2025 EventHub. All rights reserved.</p>
+      <p>Need help? Contact us at <a href="mailto:support@eventhub.com">support@eventhub.com</a></p>
+    </div>
+  </div>
+</body>
+</html>

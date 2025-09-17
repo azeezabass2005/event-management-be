@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npm run build && node ./dist/index.js",
     "build": "tsc",
-    "postbuild": "node dist/scripts/copy-templates.js",
+    "postbuild": "node scripts/copy-templates.js",
     "clean": "rimraf dist",
     "start": "node dist/index.js"
   },

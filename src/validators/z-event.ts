@@ -14,6 +14,19 @@ const ZTicketType = z.object({
     price: z.coerce.number().nonnegative("Ticket price must be a positive number"),
 });
 
+// Helper to support JSON strings (from multipart/form-data) or direct objects/arrays
+const parseJsonIfString = <T extends z.ZodTypeAny>(schema: T) =>
+    z.preprocess((value) => {
+        if (typeof value === 'string') {
+            try {
+                return JSON.parse(value);
+            } catch {
+                return value;
+            }
+        }
+        return value;
+    }, schema);
+
 const ZCreateEvent = z.object({
     title: z
         .string()
@@ -54,13 +67,8 @@ const ZCreateEvent = z.object({
         .min(10, "The event description is too short")
         .max(300, "The event description is too long")
         .optional(),
-    images: z
-        .array(z.string())
-        .min(1, "Please upload at least one image")
-    ,
-    faqs: z
-        .array(FaqQuestion)
-        .optional(),
+    images: parseJsonIfString(z.array(z.string()).min(1, "Please upload at least one image")),
+    faqs: parseJsonIfString(z.array(FaqQuestion)).optional(),
 
     // I removed this cos I will get the user who made the request from the token so it's not needed
     // user: z
@@ -79,8 +87,8 @@ const ZCreateEvent = z.object({
         .coerce
         .date("The automatically publish at must be a valid date")
     .optional(),
-    ticketTypes: z.array(ZTicketType).optional(),
-    defaultTicketType: ZTicketType.optional(),
+    ticketTypes: parseJsonIfString(z.array(ZTicketType)).optional(),
+    defaultTicketType: parseJsonIfString(ZTicketType).optional(),
 })
 
 const ZUpdateEvent = ZCreateEvent.partial();
@@ -94,7 +102,8 @@ const ZUpdateEventPublicationStatus = z.object({
 
 const validate = (req: Request, res: Response, next: NextFunction) => {
     try {
-        ZCreateEvent.parse(req.body);
+        const parsed = ZCreateEvent.parse(req.body);
+        req.body = parsed as any;
         next()
     } catch (error) {
         zodErrorHandler(error, next)
@@ -103,7 +112,8 @@ const validate = (req: Request, res: Response, next: NextFunction) => {
 
 export const validateUpdate = (req: Request, res: Response, next: NextFunction) => {
     try {
-        ZUpdateEvent.parse(req.body);
+        const parsed = ZUpdateEvent.parse(req.body);
+        req.body = parsed as any;
         next()
     } catch (error) {
         zodErrorHandler(error, next)
