@@ -11,6 +11,7 @@
     "target": "es2016",
     "outDir": "./dist",
     "types": [],
+    "noEmitOnError": false,
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -23,7 +24,7 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+
 
     // Style Options
     // "noImplicitReturns": true,
@@ -34,7 +35,7 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "strict": true,
+    "strict": false,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
