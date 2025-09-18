@@ -7,7 +7,6 @@ import BaseController from "../base-controller";
 import TicketService from "../../../services/ticket.service";
 import { Request, Response, NextFunction } from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
-import { TbHistory } from "react-icons/tb";
 // import { ticketVerificationValidate, resendTicketEmailValidate } from "../../../validators";
 
 class TicketController extends BaseController {

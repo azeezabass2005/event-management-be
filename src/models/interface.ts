@@ -34,7 +34,7 @@ export interface IUser extends Document {
     // Payment related stuff
     flutterwaveCustomerId?: string;
     availableBalance?: number;
-    totalEarnings?: string;
+    totalEarnings?: number;
 }
 
 export interface IRefreshToken extends Document {
