@@ -9,7 +9,6 @@ import {Request, Response, NextFunction} from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
 import {eventCreateValidate, eventPublicationStatusValidate, eventUpdateValidate} from "../../../validators";
 import {MulterMiddleware} from "../../../middlewares/multer.middleware";
-import { TbShirtSport } from "react-icons/tb";
 
 
 class EventController extends BaseController {
