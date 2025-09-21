@@ -4,6 +4,7 @@ import {IEvent, PublicationStatus} from "../models/interface";
 import errorResponseMessage from "../common/messages/error-response-message";
 import {FileUploadFactory} from "./file-upload.factory";
 import {UploadResult} from "../types/file.types";
+import ScannerService from "./scanner.service";
 
 /**
  * Service class for Event-related operations
@@ -12,6 +13,9 @@ import {UploadResult} from "../types/file.types";
  * @extends {DBService<IEvent>}
  */
 class EventService extends DBService<IEvent> {
+
+    scannerService: ScannerService;
+
     /**
      * Creates an instance of EventService
      * @constructor
@@ -21,6 +25,7 @@ class EventService extends DBService<IEvent> {
      */
     constructor(populatedField: string[] = []) {
         super(Event, populatedField);
+        this.scannerService = new ScannerService();
     }
 
     private profileUploadService = FileUploadFactory.getProfileUploadService();
@@ -28,7 +33,7 @@ class EventService extends DBService<IEvent> {
     /**
      * Verify if the user is the owner of the event
      */
-    private async verifyOwnership(userId: string, eventId: string): Promise<boolean> {
+    public async verifyOwnership(userId: string, eventId: string): Promise<boolean> {
         const event = await this.findById(eventId);
         if (!event) {
             throw errorResponseMessage.resourceNotFound("Event")
@@ -62,10 +67,10 @@ class EventService extends DBService<IEvent> {
     public async updateEventStatus(userId: string, eventId: string, status: PublicationStatus)  {
         const isOwner = await this.verifyOwnership(userId, eventId);
         if (!isOwner) {
-            throw errorResponseMessage.unauthorized("You unauthorized to change the publication status of this event")
+            throw errorResponseMessage.unauthorized("You are unauthorized to change the publication status of this event")
         }
 
-        return await this.updateById(eventId, { status });
+        return await this.updateById(eventId, { publicationStatus: status });
     }
 
 
@@ -107,13 +112,6 @@ class EventService extends DBService<IEvent> {
                     { description: regex },
                     { city: regex },
                     { country: regex },
-                    { 'roleData.skills': { $elemMatch: { $regex: regex } } },
-                    { 'roleData.specialties': { $elemMatch: { $regex: regex } } },
-                    { 'roleData.subjects': { $elemMatch: { $regex: regex } } },
-                    { 'roleData.talents': { $elemMatch: { $regex: regex } } },
-                    { 'roleData.expertise': regex },
-                    { 'roleData.bio': regex },
-                    { 'roleData.title': regex },
                 ];
             }
         }
@@ -124,6 +122,19 @@ class EventService extends DBService<IEvent> {
             populate,
             sort: sortOptions
         });
+    }
+
+    public async addOrRemoveScanner(action: 'add' | 'remove', email: string, userId: string, eventId: string) {
+        const isOwner = await this.verifyOwnership(userId, eventId);
+        if (!isOwner) {
+            throw errorResponseMessage.unauthorized("You are unauthorized to add scanners to this event")
+        }
+        switch (action) {
+            case "add":
+                return await this.scannerService.addScanner(eventId, email);
+            case "remove":
+                return await this.scannerService.removeScanner(eventId, email);
+        }
     }
 
 }

@@ -7,7 +7,12 @@ import BaseController from "../base-controller";
 import EventService from "../../../services/event.service";
 import {Request, Response, NextFunction} from "express";
 import errorResponseMessage from "../../../common/messages/error-response-message";
-import {eventCreateValidate, eventPublicationStatusValidate, eventUpdateValidate} from "../../../validators";
+import {
+    eventCreateValidate,
+    eventPublicationStatusValidate,
+    eventScannerAddOrRemoveValidate,
+    eventUpdateValidate
+} from "../../../validators";
 import {MulterMiddleware} from "../../../middlewares/multer.middleware";
 
 class EventController extends BaseController {
@@ -36,6 +41,11 @@ class EventController extends BaseController {
         // Update an event publication status
         this.router.patch("/publication-status/:id", eventPublicationStatusValidate, this.updateEventPublicationStatus.bind(this))
 
+        // Adds a new scanner to the event
+        this.router.post("/add-scanner/:id", eventScannerAddOrRemoveValidate, (req, res, next) => this.handleScanner('add', req, res, next));
+
+        // Removes an existing scanner from the event
+        this.router.delete("/remove-scanner/:id", eventScannerAddOrRemoveValidate, (req, res, next) => this.handleScanner('remove', req, res, next));
     }
 
     /**
@@ -142,17 +152,32 @@ class EventController extends BaseController {
      */
     private async updateEventPublicationStatus(req: Request, res: Response, next: NextFunction) {
         try {
-            const user = res.locals.user;
-            if(!user) {
-                return next(errorResponseMessage.unauthorized("Invalid user"));
+            const eventId = req.params.id;
+            if(!eventId) {
+                return next(errorResponseMessage.badRequest("Parameter 'eventId' is required"));
             }
-            const event = await this.eventService.updateEventStatus(user._id!, req.params.id!, req.body.eventPublicationStatus!);
+            const user = res.locals.user;
+
+            const event = await this.eventService.updateEventStatus(user._id!, eventId, req.body.eventPublicationStatus!);
             return this.sendSuccess(res, {
                 event,
                 message: "Event publication status updated successfully",
             })
         } catch(error) {
             return next(error)
+        }
+    }
+
+    private async handleScanner(action: 'add' | 'remove', req: Request, res: Response, next: NextFunction) {
+        try {
+            const { email } = req.body;
+            const scanner = await this.eventService.addOrRemoveScanner(action, email!, res.locals.user!, req.params.id!);
+            return this.sendSuccess(res, {
+                message: `${email} ${action === 'add' ? 'added as' : 'removed from'} scanners successfully`,
+                scanner
+            })
+        } catch (error) {
+            return next(error);
         }
     }
 

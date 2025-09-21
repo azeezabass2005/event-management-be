@@ -127,3 +127,8 @@ export interface ITransaction extends Document {
     completedAt?: Date;
     failedAt?: Date;
 }
+
+export interface IScanner extends Document {
+    scannerId: Schema.Types.ObjectId;
+    eventId: Schema.Types.ObjectId;
+}

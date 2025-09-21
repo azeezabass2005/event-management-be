@@ -5,6 +5,7 @@ export const MODEL_NAME = {
     TICKET: "TicketModel",
     ORDER: "OrderModel",
     TRANSACTION: "TransactionModel",
+    SCANNER: "ScannerModel",
 }
 
 export const ROLE_MAP = {

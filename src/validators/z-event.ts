@@ -85,6 +85,15 @@ const ZCreateEvent = z.object({
 
 const ZUpdateEvent = ZCreateEvent.partial();
 
+const ZAddOrRemoveScanner = z.object({
+    email: z
+        .string()
+        .refine((email) => {
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return emailRegex.test(email);
+        }, "Invalid email format"),
+})
+
 const ZUpdateEventPublicationStatus = z.object({
     publicationStatus: z
         .enum(Object.values(PUBLICATION_STATUS), { error: "Invalid publication status" })
@@ -115,6 +124,15 @@ export const validatePublicationStatusUpdate = (req: Request, res: Response, nex
         ZUpdateEventPublicationStatus.parse(req.body);
         next()
     } catch (error) {
+        zodErrorHandler(error, next)
+    }
+}
+
+export const validateAddOrRemoveScanner = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        ZAddOrRemoveScanner.parse(req.body);
+        next()
+    } catch(error) {
         zodErrorHandler(error, next)
     }
 }

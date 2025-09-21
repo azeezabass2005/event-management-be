@@ -15,10 +15,13 @@ import MailService from "../utils/mail.utils";
 import PDFService, { TicketPDFData } from "../utils/pdf.utils";
 import { Types } from "mongoose";
 import config from "../config/env.config";
+import EventService from "./event.service";
+import ScannerService from "./scanner.service";
 
 class TicketService extends DBService<ITicket> {
     private mailService: MailService;
     private pdfService: PDFService;
+    private scannerService: ScannerService;
 
     /**
      * Creates an instance of TicketService
@@ -45,6 +48,7 @@ class TicketService extends DBService<ITicket> {
 
         // Initialize PDF service
         this.pdfService = new PDFService();
+        this.scannerService = new ScannerService();
     }
 
     /**
@@ -205,8 +209,9 @@ class TicketService extends DBService<ITicket> {
      * Verifies the ticket and marks it as used
      * @param ticketCode - The QR code or unique identifier
      */
-    public async verifyTicket(ticketCode: string) {
+    public async verifyTicket(ticketCode: string, verifierId: string) {
         try {
+
             // Find ticket by QR code content (the unique identifier)
             const ticket = await Ticket.findOne({
                 $or: [
@@ -218,6 +223,16 @@ class TicketService extends DBService<ITicket> {
             if (!ticket) {
                 throw errorResponseMessage.resourceNotFound("Invalid Ticket: Ticket not found");
             }
+
+            const scanner = this.scannerService.findOne({
+                scannerId: verifierId,
+                // @ts-ignore
+                eventId: ticket.event?._id! as string,
+            });
+            if (!scanner) {
+                throw errorResponseMessage.unauthorized("You are not authorized to scan this ticket")
+            }
+
 
             if (ticket.isUsed) {
                 throw errorResponseMessage.resourceUsed("Ticket already used");

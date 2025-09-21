@@ -43,12 +43,14 @@ class OrderController extends BaseController {
         }
     }
 
+
     private async getOrder(req: Request, res: Response, next: NextFunction) {
         try {
             const { id } = req.params;
             const order = await this.orderService.findById(id!);
             if(!order) {
-                next(errorResponseMessage.resourceNotFound('Order'))
+                next(errorResponseMessage.resourceNotFound('Order'));
+                return;
             }
             return this.sendSuccess(res, {
                 message: "Order retrieved successfully",
