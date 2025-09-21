@@ -27,7 +27,7 @@ class EventController extends BaseController {
     protected setupRoutes(): void {
         // Get all events by the user
         this.router.get("/", this.getAllEventByUser.bind(this));
-        this.router.get("/:id",this.getEventById.bind(this))
+        this.router.get("/getEventById",this.getEventById.bind(this))
         // Create a new event
         this.router.post("/", MulterMiddleware.single('profileImage'), MulterMiddleware.handleError, eventCreateValidate, this.createEvent.bind(this));
 
@@ -114,7 +114,7 @@ class EventController extends BaseController {
             const event = await this.eventService.updateEventById(user._id!, req.params.id!, req.body, req.file);
             return this.sendSuccess(res, {
                 event,
-                message: "Event updated successfully",
+                message: "Event updated successfully", 
             })
         } catch (error) {
             return next(error)
