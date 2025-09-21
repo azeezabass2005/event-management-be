@@ -31,7 +31,9 @@ class OrderService extends DBService<IOrder> {
     }
 
     /**
-     * It creates a new order and returns the payment link
+     * Create order service
+     *
+     * @description It creates a new order and returns the virtual bank account details and the order
      * @param user
      * @param data
      * @public

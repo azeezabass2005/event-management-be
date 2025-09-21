@@ -150,7 +150,8 @@ class TicketController extends BaseController {
                 return next(errorResponseMessage.badRequest("Ticket code is required"));
             }
 
-            const verificationResult = await this.ticketService.verifyTicket(ticketCode);
+
+            const verificationResult = await this.ticketService.verifyTicket(ticketCode, res.locals.user._id!);
 
             return this.sendSuccess(res, {
                 ...verificationResult,

@@ -4,6 +4,7 @@ import logsController from "../../controllers/base/protected/logs.controller";
 import userController from "../../controllers/base/protected/user.controller";
 import eventController from "../../controllers/base/protected/event.controller";
 import orderController from "../../controllers/base/protected/order.controller";
+import ticketController from "../../controllers/base/protected/ticket.controller";
 
 const path = "/protected";
 const protectedRouter = Router();
@@ -22,5 +23,5 @@ protectedRouter.use(`${path}/logs`, logsController);
 protectedRouter.use(`${path}/users`, userController);
 protectedRouter.use(`${path}/events`, eventController)
 protectedRouter.use(`${path}/orders`, orderController)
-
+protectedRouter.use(`${path}/tickets`, ticketController)
 export default protectedRouter;
