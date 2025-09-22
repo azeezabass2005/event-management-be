@@ -175,7 +175,7 @@ class AuthController extends BaseController {
             res.cookie('accessToken', accessToken, {
                 httpOnly: true,
                 secure: config.NODE_ENV === 'production',
-                sameSite: 'none',
+                sameSite: 'lax',
                 path: "/",
                 maxAge: 60 * 60 * 1000,
                 ...(cookieDomain ? { domain: cookieDomain } : {}),
@@ -184,7 +184,7 @@ class AuthController extends BaseController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: config.NODE_ENV === 'production',
-                sameSite: 'none',
+                sameSite: 'lax',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 ...(cookieDomain ? { domain: cookieDomain } : {}),
@@ -193,7 +193,7 @@ class AuthController extends BaseController {
             res.cookie('role', Object.entries(ROLE_MAP).find(([_, v]) => v === user.role)?.[0], {
                 httpOnly: false, // Allow client-side access (if needed)
                 secure: config.NODE_ENV === 'production',
-                sameSite: 'none',
+                sameSite: 'lax',
                 path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
                 ...(cookieDomain ? { domain: cookieDomain } : {}),
